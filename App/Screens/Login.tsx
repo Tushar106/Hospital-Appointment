@@ -1,24 +1,204 @@
-import {  ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Button, Image, ImageBackground, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import LoginDoctor from "../../assets/images/LoginDoctors.png"
+import LoginPng from "../../assets/images/LoginPng.png"
+import {
+    BottomSheetModal,
+    BottomSheetModalProvider,
+    BottomSheetView,
+} from '@gorhom/bottom-sheet';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useCallback, useContext, useMemo, useRef, useState } from "react";
+import {  Ionicons, MaterialIcons } from "@expo/vector-icons";
+import Loading from "../Components/Loading";
+import { AuthContext } from "../Components/Context/AuthContext";
+
 
 const Login = () => {
+    const [loading, setLoading] = useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+    const bottomSheetRegisterRef = useRef<BottomSheetModal>(null);
+    const { register, login } = useContext(AuthContext);
+    // console.log(EXPO_PUBLIC_API_KEY)
+
+    const snapPoints = useMemo(() => ["80%"], []);
+
+    // callbacks
+    const handleLoginModalPress = useCallback(() => {
+        bottomSheetModalRef.current?.present();
+    }, []);
+    const handleRegisterModalPress = useCallback(() => {
+        bottomSheetRegisterRef.current?.present();
+    }, []);
+    const handleSheetChanges = useCallback((index: number) => {
+        setEmail("")
+        setPassword("")
+    }, []);
+
+    const handleLogin = async () => {
+        try {
+            if (email.length == 0) {
+                alert("Enter Email");
+                return
+            }
+            if (password.length <= 0) {
+                alert("Password length must be atleast 8");
+                return
+            }
+            bottomSheetModalRef.current.close();
+            setLoading(true)
+            let response = await login(email, password)
+            setLoading(false);
+            if (response.success == false) {
+                return alert(response.message)
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    const handleRegister = async () => {
+        try {
+            if (email.length == 0) {
+                alert("Enter Email");
+                return
+            }
+            if (password.length <= 0) {
+                alert("Password length must be atleast 8");
+                return
+            }
+            bottomSheetRegisterRef.current.close();
+            setLoading(true)
+            let response = await register(email, password)
+            setLoading(false);
+            if (response.success == false) {
+                return alert(response.message)
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     return (
-        <View style={style.container}>
-            <ImageBackground source={LoginDoctor} resizeMode="cover" style={style.imageWrapper}>
-                <View style={{ paddingLeft: 12 }} >
-                    <Text style={style.text}>Protect yourself {"\n"}and your loved {"\n"}ones!</Text>
-                </View>
-            </ImageBackground>
-            <View style={style.ButtonWrapper}>
-                <Text style={{fontSize:16,color:"white",fontWeight:"500"}}>Heally Taking care of your health! Book your doctor and protect your loved once</Text>
-                <TouchableOpacity style={style.button1}>
-                    <Text style={style.buttonText1}>Login with Phone Number</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={style.button2}>
-                    <Text style={style.buttonText2}>Login with Google</Text>
-                </TouchableOpacity>
+        <GestureHandlerRootView style={style.container}>
+            <View style={style.container}>
+                <BottomSheetModalProvider>
+                    <ImageBackground source={LoginDoctor} resizeMode="cover" style={style.imageWrapper}>
+                        <View style={{ paddingLeft: 12 }} >
+                            <Text style={style.text}>Protect yourself {"\n"}and your loved {"\n"}ones!</Text>
+                        </View>
+                    </ImageBackground>
+                    <View style={style.ButtonWrapper}>
+                        <Text style={{ fontSize: 16, color: "white", fontWeight: "500" }}>Heally Taking care of your health! Book your doctor and protect your loved once</Text>
+                        {!loading ? <TouchableOpacity style={style.button1} onPress={handleLoginModalPress}>
+                            <Text style={style.buttonText1}>Login with Email <Ionicons name="mail" size={18} color="white" /> </Text>
+                        </TouchableOpacity> : <Loading size={100} />}
+                        <BottomSheetModal
+                            ref={bottomSheetModalRef}
+                            index={0}
+                            snapPoints={snapPoints}
+                            onChange={handleSheetChanges}
+                        >
+                            <BottomSheetView style={style.insideModalContainer}>
+                                <View style={{ flex: 1, alignItems: "center", flexDirection: "column", gap: 10 }}>
+                                    <Image source={LoginPng} style={{ width: "80%", height: "40%", objectFit: "cover" }} />
+                                    <ScrollView>
+                                        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", gap: 10 }}>
+                                            <Text style={{ fontWeight: "bold", color: "white", fontSize: 32 }}>Sign In</Text>
+                                            <View style={{ backgroundColor: "white", width: "85%", display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10, borderRadius: 5 }}>
+                                                <Ionicons name="mail" size={32} color="green" />
+                                                <TextInput
+                                                    placeholder="Email"
+                                                    style={{
+                                                        height: 40,
+                                                        width: "80%",
+                                                        paddingLeft: 20
+                                                    }}
+                                                    placeholderTextColor={"black"}
+                                                    autoCapitalize="none"
+                                                    value={email}
+                                                    onChangeText={(text) => setEmail(text)}
+                                                />
+                                            </View>
+                                            <View style={{ backgroundColor: "white", width: "85%", display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10, borderRadius: 5 }}>
+                                                <MaterialIcons name="password" size={32} color="black" />
+                                                <TextInput
+                                                    placeholder="Password"
+                                                    style={{
+                                                        height: 40,
+                                                        width: "80%",
+                                                        paddingLeft: 20
+                                                    }}
+                                                    secureTextEntry={true}
+                                                    placeholderTextColor={"black"}
+                                                    autoCapitalize="none"
+                                                    value={password}
+                                                    onChangeText={(text) => setPassword(text)}
+                                                />
+                                            </View>
+                                            {!loading ? <TouchableOpacity onPress={handleLogin} style={[style.button2, { backgroundColor: "#3286f6" }]}>
+                                                <Text style={{ fontSize: 20, color: "white", fontWeight: "600" }}>Sign In</Text>
+                                            </TouchableOpacity> :
+                                                <Loading size={100} />
+                                            }
+                                        </View>
+                                    </ScrollView>
+                                </View>
+                            </BottomSheetView>
+                        </BottomSheetModal>
+                        <TouchableOpacity onPress={handleRegisterModalPress}>
+                            <Text style={{ fontSize: 15, fontWeight: "400", color: "white" }}>Dont have a Account? <Text style={{ textDecorationLine: "underline", color: "green", fontWeight: "700" }}>Sign Up</Text></Text>
+                        </TouchableOpacity>
+                        <BottomSheetModal
+                            ref={bottomSheetRegisterRef}
+                            index={0}
+                            snapPoints={snapPoints}
+                            onChange={handleSheetChanges}
+                        >
+                            <BottomSheetView style={style.insideModalContainer}>
+                                <View style={{ flex: 1, alignItems: "center", flexDirection: "column", gap: 10 }}>
+                                    <Text style={{ fontWeight: "bold", color: "white", fontSize: 32 }}>Register Here</Text>
+                                    <View style={{ backgroundColor: "white", width: "85%", display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10, borderRadius: 5 }}>
+                                        <Ionicons name="mail" size={32} color="green" />
+                                        <TextInput
+                                            placeholder="Email"
+                                            style={{
+                                                height: 40,
+                                                width: "80%",
+                                                paddingLeft: 20
+                                            }}
+                                            placeholderTextColor={"black"}
+                                            autoCapitalize="none"
+                                            value={email}
+                                            onChangeText={(text) => setEmail(text)}
+                                        />
+                                    </View>
+                                    <View style={{ backgroundColor: "white", width: "85%", display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10, borderRadius: 5 }}>
+                                        <MaterialIcons name="password" size={32} color="black" />
+                                        <TextInput
+                                            placeholder="Password"
+                                            style={{
+                                                height: 40,
+                                                width: "80%",
+                                                paddingLeft: 20
+                                            }}
+                                            secureTextEntry={true}
+                                            placeholderTextColor={"black"}
+                                            autoCapitalize="none"
+                                            value={password}
+                                            onChangeText={(text) => setPassword(text)}
+                                        />
+                                    </View>
+                                    {!loading ? <TouchableOpacity style={[style.button2, { backgroundColor: "#3286f6" }]} onPress={handleRegister}>
+                                        <Text style={{ fontSize: 20, color: "white", fontWeight: "600" }}>Register</Text>
+                                    </TouchableOpacity> : <Loading size={100} />}
+                                </View>
+                            </BottomSheetView>
+                        </BottomSheetModal>
+                    </View>
+                </BottomSheetModalProvider>
             </View>
-        </View>
+        </GestureHandlerRootView>
     )
 }
 const style = StyleSheet.create({
@@ -28,6 +208,7 @@ const style = StyleSheet.create({
     },
     imageWrapper: {
         flex: 2,
+        backgroundColor: "#black"
     },
     text: {
         fontSize: 24,
@@ -37,8 +218,9 @@ const style = StyleSheet.create({
     },
     ButtonWrapper: {
         flex: 1,
+        backgroundColor: "black",
         alignItems: "center",
-        gap:10
+        gap: 10
     },
     button1: {
         width: "85%",
@@ -47,7 +229,7 @@ const style = StyleSheet.create({
         alignItems: "center",
         display: "flex",
         textAlign: "center",
-        padding: 10,
+        padding: 8,
         borderRadius: 10
     },
     button2: {
@@ -57,20 +239,32 @@ const style = StyleSheet.create({
         alignItems: "center",
         display: "flex",
         textAlign: "center",
-        padding: 10,
+        padding: 8,
         borderRadius: 10
     },
     buttonText1: {
-        fontSize: 20,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        fontSize: 18,
         fontStyle: "italic",
         fontWeight: "600",
         color: "white"
     },
     buttonText2: {
-        fontSize: 20,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        fontSize: 18,
         fontStyle: "italic",
         fontWeight: "600",
         color: "black"
     },
+    insideModalContainer: {
+        flex: 1,
+        backgroundColor: "black",
+        justifyContent: "center",
+        alignContent: "center"
+    }
 })
 export default Login
