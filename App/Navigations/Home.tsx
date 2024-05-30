@@ -16,6 +16,7 @@ export default function Home() {
         <Tab.Navigator screenOptions={{headerShown: false, tabBarActiveTintColor: "#01C77D", tabBarStyle: { backgroundColor: "black",borderTopWidth:0 }, tabBarLabelPosition: "beside-icon", tabBarLabelStyle: { fontSize: 15 }, tabBarHideOnKeyboard: true }}>
           <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarIcon: ({ size, color }) => <FontAwesome name="home" size={size} color={color} /> }} />
           <Tab.Screen name="Search" component={SearchScreenNavigation} options={{
+            unmountOnBlur:true,
             tabBarIcon: ({ size, color }) => <FontAwesome name="search" size={size} color={color} />
           }
           } />

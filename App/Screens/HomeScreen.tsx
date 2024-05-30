@@ -5,14 +5,14 @@ import Header from '../Components/Home/Header'
 import Poster from '../Components/Home/Poster';
 import { Services } from '../Components/Home/Services';
 
-export default function HomeScreen() {
+export default function HomeScreen({navigation}) {
  
   return (
     <View style={style.container}>
       <Header />
       <ScrollView>
        <Poster/>
-        <Services/>
+        <Services navigation={navigation}/>
       </ScrollView>
     </View>
   )

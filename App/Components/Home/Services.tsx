@@ -4,8 +4,8 @@ import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Fontisto from '@expo/vector-icons/Fontisto';
 
-export function Services() {
-    const services = [{ type: 'Market Place', icon: <Entypo name="circle-with-plus" size={40} color="green" /> }, {
+export function Services({navigation}) {
+    const services = [{ type: 'Hopitals', icon: <FontAwesome5 name="hospital-alt" size={40} color="green" /> }, {
         type: "Doctors",
         icon: <Fontisto name="doctor" size={40} color="white" />
     }, {
@@ -26,7 +26,9 @@ export function Services() {
                 {services.map((item, index) => {
                     return (
                         <View style={{ width: "50%" }} key={index}>
-                            <TouchableOpacity key={index} style={{ padding: 10, margin: 5, flex:1, flexDirection: "row", backgroundColor: "#3c3c3c", borderWidth: 1, borderColor: "#9B9797", borderRadius: 5, gap: 5, justifyContent: "center", alignItems: "center" }}>
+                            <TouchableOpacity key={index} style={{ padding: 10, margin: 5, flex:1, flexDirection: "row", backgroundColor: "#3c3c3c", borderWidth: 1, borderColor: "#9B9797", borderRadius: 5, gap: 5, justifyContent: "center", alignItems: "center" }} onPress={()=>{
+                                navigation.navigate('Search',{screen:"SearchScreen",params:{searchElement:item.type}})
+                            }}>
                                 <Text style={{ fontSize: 22, color: "white", fontWeight: "500", width: "70%", textAlign: 'center' }}>{item.type}</Text>
                                 {item.icon}
                             </TouchableOpacity>

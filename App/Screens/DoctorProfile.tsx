@@ -11,8 +11,10 @@ export default function DoctorProfile({ navigation }) {
     const dates = ['Today', 'Tomorrow', new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toDateString(), new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toDateString()];
     const startTime = 10; // Start time in 24-hour format
     const endTime = 18; // End time in 24-hour format
-    const timeSlot = Array(endTime - startTime + 1).fill(null).map((_, index) => `${startTime + index}:00`);
-
+    const timeSlot = Array(endTime - startTime + 1).fill(null).map((_, index) => {
+        const hour = startTime + index;
+        return `${hour % 12 || 12}:${'00'} ${hour < 12 ? 'AM' : 'PM'}`;
+    });
     const [currentTime, setCurrentTime] = useState(new Date());
 
     useEffect(() => {
@@ -41,7 +43,24 @@ export default function DoctorProfile({ navigation }) {
         if (selectedTime == -1) {
             return alert("Please select a Time");
         }
-        navigation.navigate("Confirmation", { date: selectedDate, time: selectedTime });
+        var selectedDateObj = new Date(dates[selectedDate]);
+        if (selectedDate == 0) {
+            selectedDateObj = new Date();
+        }
+        if (selectedDate == 1) {
+            selectedDateObj = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000);
+        }
+        const selectedTimeObj = new Date();
+        selectedTimeObj.setHours(parseInt(timeSlot[selectedTime].split(':')[0]), 0, 0, 0);
+        if (selectedDateObj >= new Date() || (selectedDateObj.toDateString() === new Date().toDateString() && selectedTimeObj > new Date())) {
+            const formattedDate = selectedDateObj.toLocaleString('default', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' });
+            navigation.navigate('Confirmation', {
+                selectedDate:formattedDate,
+                selectedTime: timeSlot[selectedTime]
+            });
+        } else {
+            alert('Selected date and time is in the past. Please select a future date and time.');
+        }
     }
     return (
         <SafeAreaView style={{ flex: 1, flexDirection: "column", padding: 10 }}>
@@ -97,7 +116,7 @@ export default function DoctorProfile({ navigation }) {
                         </ScrollView>
                         <View style={{ display: 'flex', flexDirection: "row", justifyContent: "space-between", flexWrap: 'wrap' }}>
                             {timeSlot.map((time, index) => {
-                                const isPast = selectedDate === 0 && new Date().getHours() >=startTime + index;
+                                const isPast = selectedDate === 0 && new Date().getHours() >= startTime + index;
                                 return (
                                     <View style={{ width: "33.33%", padding: 5 }} key={index}>
                                         <TouchableOpacity

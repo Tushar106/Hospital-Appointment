@@ -1,4 +1,4 @@
-import { Button, Image, ImageBackground, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { Button, Alert, Image, ImageBackground, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import LoginDoctor from "../../assets/images/LoginDoctors.png"
 import LoginPng from "../../assets/images/LoginPng.png"
 import {
@@ -8,18 +8,21 @@ import {
 } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useCallback, useContext, useMemo, useRef, useState } from "react";
-import {  Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import Loading from "../Components/Loading";
 import { AuthContext } from "../Components/Context/AuthContext";
 
 
+
 const Login = () => {
     const [loading, setLoading] = useState(false);
+    
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [name, setName] = useState("");
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
     const bottomSheetRegisterRef = useRef<BottomSheetModal>(null);
-    const { register, login } = useContext(AuthContext);
+    const { register, login} = useContext(AuthContext);
     // console.log(EXPO_PUBLIC_API_KEY)
 
     const snapPoints = useMemo(() => ["80%"], []);
@@ -67,17 +70,23 @@ const Login = () => {
                 alert("Password length must be atleast 8");
                 return
             }
+            if (name.length <= 0) {
+                alert("Password length must be atleast 8");
+                return
+            }
             bottomSheetRegisterRef.current.close();
             setLoading(true)
-            let response = await register(email, password)
-            setLoading(false);
+            let response = await register(email, password, name)
             if (response.success == false) {
                 return alert(response.message)
             }
+            await setLoading(false);
         } catch (error) {
+            setLoading(true)
             console.log(error);
         }
     }
+    
 
     return (
         <GestureHandlerRootView style={style.container}>
@@ -156,43 +165,60 @@ const Login = () => {
                             onChange={handleSheetChanges}
                         >
                             <BottomSheetView style={style.insideModalContainer}>
-                                <View style={{ flex: 1, alignItems: "center", flexDirection: "column", gap: 10 }}>
-                                    <Text style={{ fontWeight: "bold", color: "white", fontSize: 32 }}>Register Here</Text>
-                                    <View style={{ backgroundColor: "white", width: "85%", display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10, borderRadius: 5 }}>
-                                        <Ionicons name="mail" size={32} color="green" />
-                                        <TextInput
-                                            placeholder="Email"
-                                            style={{
-                                                height: 40,
-                                                width: "80%",
-                                                paddingLeft: 20
-                                            }}
-                                            placeholderTextColor={"black"}
-                                            autoCapitalize="none"
-                                            value={email}
-                                            onChangeText={(text) => setEmail(text)}
-                                        />
+                                <ScrollView>
+                                    <View style={{ flex: 1, alignItems: "center", flexDirection: "column", gap: 10 }}>
+                                        <Text style={{ fontWeight: "bold", color: "white", fontSize: 32 }}>Register Here</Text>
+                                        <View style={{ backgroundColor: "white", width: "85%", display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10, borderRadius: 5 }}>
+                                            <MaterialIcons name="drive-file-rename-outline" size={32} color="green" />
+                                            <TextInput
+                                                placeholder="Name"
+                                                style={{
+                                                    height: 40,
+                                                    width: "80%",
+                                                    paddingLeft: 20
+                                                }}
+                                                placeholderTextColor={"black"}
+                                                autoCapitalize="none"
+                                                value={name}
+                                                onChangeText={(text) => setName(text)}
+                                            />
+                                        </View>
+                                        <View style={{ backgroundColor: "white", width: "85%", display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10, borderRadius: 5 }}>
+                                            <Ionicons name="mail" size={32} color="green" />
+                                            <TextInput
+                                                placeholder="Email"
+                                                style={{
+                                                    height: 40,
+                                                    width: "80%",
+                                                    paddingLeft: 20
+                                                }}
+                                                placeholderTextColor={"black"}
+                                                autoCapitalize="none"
+                                                value={email}
+                                                onChangeText={(text) => setEmail(text)}
+                                            />
+                                        </View>
+                                        <View style={{ backgroundColor: "white", width: "85%", display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10, borderRadius: 5 }}>
+                                            <MaterialIcons name="password" size={32} color="black" />
+                                            <TextInput
+                                                placeholder="Password"
+                                                style={{
+                                                    height: 40,
+                                                    width: "80%",
+                                                    paddingLeft: 20
+                                                }}
+                                                secureTextEntry={true}
+                                                placeholderTextColor={"black"}
+                                                autoCapitalize="none"
+                                                value={password}
+                                                onChangeText={(text) => setPassword(text)}
+                                            />
+                                        </View>
+                                        {!loading ? <TouchableOpacity style={[style.button2, { backgroundColor: "#3286f6" }]} onPress={handleRegister}>
+                                            <Text style={{ fontSize: 20, color: "white", fontWeight: "600" }}>Register</Text>
+                                        </TouchableOpacity> : <Loading size={100} />}
                                     </View>
-                                    <View style={{ backgroundColor: "white", width: "85%", display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10, borderRadius: 5 }}>
-                                        <MaterialIcons name="password" size={32} color="black" />
-                                        <TextInput
-                                            placeholder="Password"
-                                            style={{
-                                                height: 40,
-                                                width: "80%",
-                                                paddingLeft: 20
-                                            }}
-                                            secureTextEntry={true}
-                                            placeholderTextColor={"black"}
-                                            autoCapitalize="none"
-                                            value={password}
-                                            onChangeText={(text) => setPassword(text)}
-                                        />
-                                    </View>
-                                    {!loading ? <TouchableOpacity style={[style.button2, { backgroundColor: "#3286f6" }]} onPress={handleRegister}>
-                                        <Text style={{ fontSize: 20, color: "white", fontWeight: "600" }}>Register</Text>
-                                    </TouchableOpacity> : <Loading size={100} />}
-                                </View>
+                                </ScrollView>
                             </BottomSheetView>
                         </BottomSheetModal>
                     </View>
@@ -262,9 +288,44 @@ const style = StyleSheet.create({
     },
     insideModalContainer: {
         flex: 1,
+        padding:10,
         backgroundColor: "black",
         justifyContent: "center",
         alignContent: "center"
-    }
+    },
+    button: {
+        backgroundColor: "#007AFF",
+        padding: 10,
+        borderRadius: 8,
+        marginBottom: 16,
+        shadowColor: "#000000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.4,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    buttonText: {
+        color: "#FFFFFF",
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    imageContainer: {
+        borderRadius: 8,
+        marginBottom: 16,
+        shadowColor: "#000000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.4,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    image: {
+        width: 200,
+        height: 200,
+        borderRadius: 8,
+    },
+    errorText: {
+        color: "red",
+        marginTop: 16,
+    },
 })
 export default Login
