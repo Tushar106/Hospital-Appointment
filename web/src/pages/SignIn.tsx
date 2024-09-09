@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
+import { useFirebase } from '@/context/Firebase'
 
 
 export const SignIn = () => {
@@ -14,9 +15,12 @@ export const SignIn = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
 
+  const { signinUserWithEmailAndPass } = useFirebase();
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+    const response = await signinUserWithEmailAndPass(email, password)
+    console.log(response)
     toast({
       title: "Signed in",
       description: "You've successfully signed in!",
